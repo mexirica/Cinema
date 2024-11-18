@@ -1,0 +1,6 @@
+﻿services:
+  cinema:
+    image: cinema
+    build:
+      context: .
+      dockerfile: Cinema.API/Dockerfile
