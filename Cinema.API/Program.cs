@@ -20,9 +20,11 @@ builder.Services.AddMediatR(config =>
 
 #region Data Services
 
-builder.Services.AddDatabase(builder.Configuration);
-builder.Services.AddHealthChecks()
-			.AddNpgSql(builder.Configuration.GetConnectionString("Postgres")!);
+var connName = "Database";
+
+builder.Services.AddDatabase(builder.Configuration, connName).AddHealthChecks()
+	.AddNpgSql(builder.Configuration.GetConnectionString(connName)!);
+
 builder.Services.AddDbContext<CinemaDbContext>();
 
 #endregion
@@ -33,6 +35,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
 
 var app = builder.Build();
+
+app.MigrateDatabase();
 
 app.MapCarter();
 app.UseExceptionHandler(opts => { });
