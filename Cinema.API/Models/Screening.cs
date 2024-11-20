@@ -28,6 +28,11 @@ namespace Cinema.API.Models
 
 		public Movie? Movie { get; set; }
 		public Room? Room { get; set; }
+		
+		public bool IsAlreadyPassed()
+		{
+			return Date < DateTime.Now;
+		}
 	}
 
 }

@@ -31,5 +31,12 @@
                 dbContext.Database.Migrate();
             }
         }
+
+        public static async Task Seed(this WebApplication app)
+        {
+            using var scope = app.Services.CreateScope();
+            var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+            await seeder.SeedAsync();
+        }
     }
 }

@@ -18,5 +18,7 @@ namespace Cinema.API.Models
 
 		public Sale? Sale { get; set; }
 		public Screening? Screening { get; set; }
+		
+		public bool UnassignedSeat { get; set; }
 	}
 }

@@ -12,10 +12,5 @@ namespace Cinema.API.Models
 
 		[Required]
 		public string Row { get; set; } = string.Empty;
-
-		public Seat()
-		{
-			
-		}
 	}
 }

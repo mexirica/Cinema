@@ -5,9 +5,6 @@ namespace Cinema.API.Models
 {
 	public class SaleScreeningSeat
 	{
-		[Key]
-		public int Id { get; set; }
-
 		[Required]
 		[ForeignKey(nameof(SaleScreening))]
 		public int SaleScreeningId { get; set; }
