@@ -3,6 +3,7 @@ using BuildingBlocks.Behaviors;
 using BuildingBlocks.Exceptions.Handler;
 using Carter;
 using FluentValidation;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,19 @@ builder.Services.AddScoped<DatabaseSeeder>();
 
 #endregion
 
+#region Logging
+
+Log.Logger = new LoggerConfiguration()
+	.MinimumLevel.Information()
+	.WriteTo.Console()
+	.WriteTo.File("logs/log.csv", outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss}, {Level}, {Message}{NewLine}{Exception}"
+	,rollingInterval: RollingInterval.Day)
+	.CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Services.AddSerilog();
+#endregion
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -60,3 +74,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.Run();
+
+Log.CloseAndFlush();
