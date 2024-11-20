@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace Cinema.API.Screenings.MultipleBookings;
 
 #region Request and Response
-public record ScreeningSeatDto(int ScreeningId,IEnumerable<int> SeatId);
+
+public record ScreeningSeatDto(int ScreeningId, IEnumerable<int> SeatId);
 
 public record MultipleBookingRequest(List<ScreeningSeatDto> ScreeningSeats, int CustomerId);
 
 public record MultipleBookingResponse(bool Success, string Message, int? SaleId);
+
 #endregion
 
 public class MultipleBookingEndpoint : ICarterModule

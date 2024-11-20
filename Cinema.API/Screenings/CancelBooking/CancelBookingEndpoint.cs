@@ -11,14 +11,15 @@ public class CancelBookingEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapDelete("screenings/{screeningId:int}/cancel-booking", async (int screeningId,[FromBody] CancelBookingRequest req, ISender sender) =>
-            {
-                var result = await sender.Send(new CancelBookingCommand(screeningId, req.SaleId, req.CustomerId));
+        app.MapDelete("screenings/{screeningId:int}/cancel-booking",
+                async (int screeningId, [FromBody] CancelBookingRequest req, ISender sender) =>
+                {
+                    var result = await sender.Send(new CancelBookingCommand(screeningId, req.SaleId, req.CustomerId));
 
-                var response = result.Adapt<CancelBookingResponse>();
+                    var response = result.Adapt<CancelBookingResponse>();
 
-                return Results.Ok(response);
-            })
+                    return Results.Ok(response);
+                })
             .Produces<CancelBookingResponse>()
             .ProducesProblem(404)
             .WithSummary("Cancel a booking")
