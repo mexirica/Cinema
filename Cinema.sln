@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildingBlocks", "BuildingBlocks\BuildingBlocks.csproj", "{C1FF46F0-8B66-4FFE-BCE6-FB07A53EAD7E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinema.Gateway", "Cinema.Gateway\Cinema.Gateway.csproj", "{3F50DE92-2CB2-4628-9CCB-0F287A693774}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{C1FF46F0-8B66-4FFE-BCE6-FB07A53EAD7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1FF46F0-8B66-4FFE-BCE6-FB07A53EAD7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1FF46F0-8B66-4FFE-BCE6-FB07A53EAD7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F50DE92-2CB2-4628-9CCB-0F287A693774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F50DE92-2CB2-4628-9CCB-0F287A693774}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F50DE92-2CB2-4628-9CCB-0F287A693774}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F50DE92-2CB2-4628-9CCB-0F287A693774}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
