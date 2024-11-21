@@ -6,6 +6,22 @@
       context: .
       dockerfile: Cinema.API/Dockerfile
     ports:
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8081
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__Database=Server=cinema-db;Port=5432;Database=Cinema;User Id=postgres;Password=postgres;Include Error Detail=true
+    depends_on:
+      - cinema-db
+      - cinema-mq
+
+  gateway:
+    image: gateway
+    container_name: gateway
+    build:
+      context: .
+      dockerfile: Cinema.Gateway/Dockerfile
+    ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_HTTP_PORTS=8080
@@ -13,6 +29,20 @@
       - ConnectionStrings__Database=Server=cinema-db;Port=5432;Database=Cinema;User Id=postgres;Password=postgres;Include Error Detail=true
     depends_on:
       - cinema-db
+        
+  notification:
+    image: notification
+    container_name: notification
+    build:
+      context: .
+      dockerfile: MailService/Dockerfile
+    ports:
+      - "8082:8080"
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - cinema-mq
 
   cinema-db:
     image: postgres
@@ -26,6 +56,20 @@
       - "5432:5432"
     volumes:
       - postgres_cinema:/var/lib/postgresql/data
+      
+  cinema-mq:
+    image: rabbitmq:3-management-alpine
+    container_name: cinema-mq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=password
+
 
 volumes:
   postgres_cinema:
+  rabbitmq_data:

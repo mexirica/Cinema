@@ -1,10 +1,13 @@
+using BuildingBlocks.MessageBus;
 using Cinema.API.Helpers;
-using Cinema.API.Models;
 using FluentValidation;
+using MassTransit;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Cinema.API.Screenings.BookScreening;
 
 #region Command and Result
+
 public record BuyScreeningCommand(int ScreeningId, int CustomerId) : ICommand<BuyScreeningResult>;
 
 public record BuyScreeningResult(bool Success, int? SaleId, string? Message);
@@ -24,7 +27,7 @@ public class BuyScreeningCommandValidator : AbstractValidator<BuyScreeningComman
 
 #endregion
 
-public class BookScreeningHandler(CinemaDbContext db) : ICommandHandler<BuyScreeningCommand, BuyScreeningResult>
+public class BookScreeningHandler(CinemaDbContext db, IPublishEndpoint publisher) : ICommandHandler<BuyScreeningCommand, BuyScreeningResult>
 {
     public async Task<BuyScreeningResult> Handle(BuyScreeningCommand request, CancellationToken cancellationToken)
     {
@@ -33,9 +36,9 @@ public class BookScreeningHandler(CinemaDbContext db) : ICommandHandler<BuyScree
         {
             var screening = await ScreeningHelper.GetScreeningAsync(db, request.ScreeningId, cancellationToken);
 
-            var existCustomer = await db.Customers.AnyAsync(c => c.Id == request.CustomerId, cancellationToken);
+            var customer = await db.Customers.FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken);
 
-            if (!existCustomer) throw new BadRequestException("Customer not found");
+            if (customer is null) throw new NotFoundException("Customer not found");
 
             var totalAvailableSeats = screening.Room.RoomSeat.Count - await db.SaleScreenings
                 .CountAsync(ss => ss.ScreeningId == request.ScreeningId, cancellationToken);
@@ -63,12 +66,23 @@ public class BookScreeningHandler(CinemaDbContext db) : ICommandHandler<BuyScree
             db.SaleScreenings.Add(saleScreening);
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
+            
+                await publisher.Publish(
+                    new Message(
+                        customer.Email,
+                        "Ticket purchased",
+                        $"Hi {customer.Name} " +
+                        $"\nYou have successfully purchased a ticket for the screening {screening.Movie.Title}" +
+                        $" on {screening.Date}"), cancellationToken);
 
             return new BuyScreeningResult(true, sale.Id, null);
         }
         catch
         {
-            await transaction.RollbackAsync(cancellationToken);
+            if (transaction.GetDbTransaction().Connection != null)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+            }
             throw;
         }
     }

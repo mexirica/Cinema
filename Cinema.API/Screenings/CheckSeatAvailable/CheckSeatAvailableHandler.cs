@@ -4,6 +4,7 @@ using FluentValidation;
 namespace Cinema.API.Screenings.CheckSeatAvailable;
 
 #region Query
+
 public record CheckSeatAvailableQuery(int ScreeningId, int SeatId) : IQuery<CheckSeatAvailableResponse>;
 
 #endregion
@@ -27,7 +28,14 @@ public class CheckSeatAvailableHandler(CinemaDbContext db)
     public async Task<CheckSeatAvailableResponse> Handle(CheckSeatAvailableQuery request,
         CancellationToken cancellationToken)
     {
-        var screening = await ScreeningHelper.GetScreeningAsync(db, request.ScreeningId, cancellationToken);
+        try
+        {
+            var screening = await ScreeningHelper.GetScreeningAsync(db, request.ScreeningId, cancellationToken);
+        }
+        catch (InvalidOperationException)
+        {
+            return new CheckSeatAvailableResponse(false, "Screening already passed");
+        }
 
         var seat = await SeatHelper.GetRoomSeatAsync(db, request.SeatId, cancellationToken);
 

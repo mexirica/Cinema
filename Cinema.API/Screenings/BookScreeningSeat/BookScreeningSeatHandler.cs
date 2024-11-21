@@ -1,5 +1,4 @@
 using Cinema.API.Helpers;
-using Cinema.API.Models;
 using FluentValidation;
 
 namespace Cinema.API.Screenings.ChooseSeat;
@@ -13,6 +12,7 @@ public record ChooseSeatCommandResult(bool Success, string Message, int? SaleId)
 #endregion
 
 #region Validation
+
 public class ChooseSeatCommandValidator : AbstractValidator<ChooseSeatCommand>
 {
     public ChooseSeatCommandValidator()
@@ -29,7 +29,7 @@ public class BookScreeningSeatHandler(CinemaDbContext db) : ICommandHandler<Choo
 {
     public async Task<ChooseSeatCommandResult> Handle(ChooseSeatCommand request, CancellationToken cancellationToken)
     {
-        using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         try
         {
             var screening = await ScreeningHelper.GetScreeningAsync(db, request.ScreeningId, cancellationToken);

@@ -6,11 +6,11 @@ namespace NotificationService.Models
 	public class Email : ISender
 	{
 		private SmtpClient _smtpClient;
-		private EmailConfig _config;
+		private EmailConfig _config = new();
 
-		public Email(EmailConfig config)
+		public Email(IConfiguration config)
 		{
-			_config = config;
+			config.GetSection("EmailConfig").Bind(_config);
 			_smtpClient = new SmtpClient(_config.SmtpServer)
 			{
 				Port = _config.Port,
@@ -32,11 +32,6 @@ namespace NotificationService.Models
 			mailMessage.To.Add(to);
 
 			await _smtpClient.SendMailAsync(mailMessage);
-		}
-
-		public void FecharConexao()
-		{
-			_smtpClient?.Dispose();
 		}
 	}
 }

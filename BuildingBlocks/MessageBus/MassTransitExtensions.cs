@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Reflection;
 
 namespace BuildingBlocks.MessageBus
 {
@@ -14,51 +15,24 @@ namespace BuildingBlocks.MessageBus
 
 	public static class MassTransitExtensions
 	{
-		private static void ConfigureRabbitMqHost(IConfiguration configuration, IBusRegistrationContext context, IRabbitMqBusFactoryConfigurator cfg)
+		public static IServiceCollection AddMessageBroker(this IServiceCollection services,
+			IConfiguration configuration, Assembly? assembly = null)
 		{
-			var rabbitmqConfig = new RabbitMqConfiguration();
-			configuration.GetSection("RabbitMq").Bind(rabbitmqConfig);
-
-			if (string.IsNullOrEmpty(rabbitmqConfig.Host) || string.IsNullOrEmpty(rabbitmqConfig.Username) || string.IsNullOrEmpty(rabbitmqConfig.Password))
+			services.AddMassTransit(config =>
 			{
-				throw new InvalidOperationException("RabbitMQ configuration is incomplete.");
-			}
+				config.SetKebabCaseEndpointNameFormatter();
 
-			cfg.Host($"rabbitmq://{rabbitmqConfig.Host}", h =>
-			{
-				h.Username(rabbitmqConfig.Username);
-				h.Password(rabbitmqConfig.Password);
-			});
-		}
+				if (assembly != null)
+					config.AddConsumers(assembly);
 
-		public static IServiceCollection AddMassTransitPublisher(this IServiceCollection services, IConfiguration configuration)
-		{
-			services.AddMassTransit(x =>
-			{
-				x.UsingRabbitMq((context, cfg) =>
+				config.UsingRabbitMq((context, configurator) =>
 				{
-					ConfigureRabbitMqHost(configuration, context, cfg);
-				});
-			});
-
-			return services;
-		}
-
-		public static IServiceCollection AddMassTransitConsumer<T>(this IServiceCollection services, IConfiguration configuration)
-				where T : class, IConsumer
-		{
-			services.AddMassTransit(x =>
-			{
-				x.AddConsumer<T>();
-
-				x.UsingRabbitMq((context, cfg) =>
-				{
-					ConfigureRabbitMqHost(configuration, context, cfg);
-
-					cfg.ReceiveEndpoint(configuration["RabbitMq:QueueName"], e =>
+					configurator.Host(new Uri(configuration["MessageBroker:Host"]!), host =>
 					{
-						e.ConfigureConsumer<T>(context); 
+						host.Username(configuration["MessageBroker:UserName"]!);
+						host.Password(configuration["MessageBroker:Password"]!);
 					});
+					configurator.ConfigureEndpoints(context);
 				});
 			});
 
