@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35506.116 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinema.API", "Cinema.API\Cinema.API.csproj", "{A531E1BA-DE59-4278-83D2-30B98109A976}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6BA6DF05-0E34-43D4-B488-1EA4469ED584}"
@@ -10,6 +13,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildingBlocks", "BuildingBlocks\BuildingBlocks.csproj", "{C1FF46F0-8B66-4FFE-BCE6-FB07A53EAD7E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cinema.Gateway", "Cinema.Gateway\Cinema.Gateway.csproj", "{3F50DE92-2CB2-4628-9CCB-0F287A693774}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService", "MailService\NotificationService.csproj", "{AA688329-6E2F-4B00-BEFE-1BA5235C28FE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,5 +34,12 @@ Global
 		{3F50DE92-2CB2-4628-9CCB-0F287A693774}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F50DE92-2CB2-4628-9CCB-0F287A693774}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F50DE92-2CB2-4628-9CCB-0F287A693774}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA688329-6E2F-4B00-BEFE-1BA5235C28FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA688329-6E2F-4B00-BEFE-1BA5235C28FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA688329-6E2F-4B00-BEFE-1BA5235C28FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA688329-6E2F-4B00-BEFE-1BA5235C28FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal
