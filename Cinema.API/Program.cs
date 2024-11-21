@@ -1,9 +1,9 @@
 using Cinema.API.Configurations;
 using BuildingBlocks.Behaviors;
 using BuildingBlocks.Exceptions.Handler;
-using Carter;
 using FluentValidation;
 using Serilog;
+using BuildingBlocks.MessageBus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +19,7 @@ builder.Services.AddMediatR(config =>
 });
 
 builder.Services.AddValidatorsFromAssembly(assembly);
+builder.Services.AddMassTransitPublisher(builder.Configuration);
 
 #endregion
 
