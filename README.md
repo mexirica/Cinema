@@ -47,3 +47,19 @@ docker-compose up -d
 ```
 
 3. Wait for docker compose all microservices. That’s it! (some microservices need extra time to work so please wait if not worked in first shut)
+
+### Routes
+1.Gateway (localhost:8080)
+* **/user/login** Send a POST to login
+* **/user/register** Send a POST to sign up 
+* **/api/public/** to access public endpoints (Booking to check a seat)
+* **/api/protected** to access protected endpoints in booking
+
+* Use the last two as prefixes before the booking path
+
+2.Booking (localhost:8081)
+* **/screenings/multiple-bookings** Send a POST to book one or more screening or one or more seats
+* **/screenings/{/screeningId}/buy** Send a POST to book a screening without choose a seat
+* **/screenings/{screeningId}/choose-seat** Send a POST to book a screening and choose a seat
+* **/screenings/{screeningId}/check-seat-available/{seatId}** Send a GET to see if the seat is available for this screening
+* **/screenings/{screeningId}/cancel-booking** Send a Delete to cancel the sale
