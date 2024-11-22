@@ -1,5 +1,4 @@
 using BuildingBlocks.MessageBus;
-using MailService;
 using NotificationService.Models;
 
 var builder = WebApplication.CreateBuilder(args);

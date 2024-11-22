@@ -1,15 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Cinema.API.Models
+namespace Cinema.API.Models;
+
+public class Room
 {
-	public class Room
-	{
-		[Key]
-		public int Id { get; set; }
+    [Key] public int Id { get; set; }
 
-		[Required]
-		public string Name { get; set; } = string.Empty;
+    [Required] public string Name { get; set; } = string.Empty;
 
-		public ICollection<RoomSeat> RoomSeat { get; set; } = new List<RoomSeat>();
-	}
+    public ICollection<RoomSeat> RoomSeat { get; set; } = new List<RoomSeat>();
 }

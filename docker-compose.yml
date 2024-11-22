@@ -29,7 +29,7 @@
       - ConnectionStrings__Database=Server=cinema-db;Port=5432;Database=Cinema;User Id=postgres;Password=postgres;Include Error Detail=true
     depends_on:
       - cinema-db
-        
+  
   notification:
     image: notification
     container_name: notification
@@ -56,7 +56,7 @@
       - "5432:5432"
     volumes:
       - postgres_cinema:/var/lib/postgresql/data
-      
+  
   cinema-mq:
     image: rabbitmq:3-management-alpine
     container_name: cinema-mq

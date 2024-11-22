@@ -1,4 +1,3 @@
-using BuildingBlocks.MessageBus;
 using Cinema.API.Booking.Helpers;
 using Cinema.API.Helpers;
 using FluentValidation;
@@ -28,7 +27,8 @@ public class BuyScreeningCommandValidator : AbstractValidator<BuyScreeningComman
 
 #endregion
 
-public class BookScreeningHandler(CinemaDbContext db, IPublishEndpoint publisher) : ICommandHandler<BuyScreeningCommand, BuyScreeningResult>
+public class BookScreeningHandler(CinemaDbContext db, IPublishEndpoint publisher)
+    : ICommandHandler<BuyScreeningCommand, BuyScreeningResult>
 {
     public async Task<BuyScreeningResult> Handle(BuyScreeningCommand request, CancellationToken cancellationToken)
     {
@@ -67,20 +67,17 @@ public class BookScreeningHandler(CinemaDbContext db, IPublishEndpoint publisher
             db.SaleScreenings.Add(saleScreening);
             await db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
-            
-                await publisher.Publish(
-                    MessageFactory
-                    .CreateGenericTicketPurchasedMessage(customer,screening),
-                    cancellationToken);
+
+            await publisher.Publish(
+                MessageFactory
+                    .CreateGenericTicketPurchasedMessage(customer, screening),
+                cancellationToken);
 
             return new BuyScreeningResult(true, sale.Id, null);
         }
         catch
         {
-            if (transaction.GetDbTransaction().Connection != null)
-            {
-                await transaction.RollbackAsync(cancellationToken);
-            }
+            if (transaction.GetDbTransaction().Connection != null) await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }

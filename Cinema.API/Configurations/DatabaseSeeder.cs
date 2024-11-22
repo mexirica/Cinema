@@ -1,15 +1,13 @@
-using Cinema.API.Models;
-
 namespace Cinema.API.Configurations;
 
 /// <summary>
-/// Class to seed the database with initial data for tests.
+///     Class to seed the database with initial data for tests.
 /// </summary>
 /// <param name="context"></param>
 public class DatabaseSeeder(CinemaDbContext context)
 {
     /// <summary>
-    /// Check if the database is already seeded, if not, seed it.
+    ///     Check if the database is already seeded, if not, seed it.
     /// </summary>
     public async Task SeedAsync()
     {
@@ -86,13 +84,10 @@ public class DatabaseSeeder(CinemaDbContext context)
         if (!await context.Seats.AnyAsync())
         {
             var seats = new List<Seat>();
-            for (char row = 'A'; row <= 'C'; row++)
-            {
-                for (int number = 1; number <= 10; number++)
-                {
-                    seats.Add(new Seat { Row = row.ToString(), Number = number.ToString() });
-                }
-            }
+            for (var row = 'A'; row <= 'C'; row++)
+            for (var number = 1; number <= 10; number++)
+                seats.Add(new Seat { Row = row.ToString(), Number = number.ToString() });
+
             context.Seats.AddRange(seats);
             await context.SaveChangesAsync();
         }
@@ -107,12 +102,9 @@ public class DatabaseSeeder(CinemaDbContext context)
             var roomSeats = new List<RoomSeat>();
 
             foreach (var room in rooms)
-            {
-                foreach (var seat in seats)
-                {
-                    roomSeats.Add(new RoomSeat { RoomId = room.Id, SeatId = seat.Id });
-                }
-            }
+            foreach (var seat in seats)
+                roomSeats.Add(new RoomSeat { RoomId = room.Id, SeatId = seat.Id });
+
             context.RoomSeats.AddRange(roomSeats);
             await context.SaveChangesAsync();
         }

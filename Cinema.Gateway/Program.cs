@@ -10,42 +10,43 @@ var builder = WebApplication.CreateBuilder(args);
 #region DataBase
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-		options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 
 #endregion
 
 #region Auth
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-		.AddEntityFrameworkStores<AppDbContext>()
-		.AddDefaultTokenProviders();
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(options =>
-		{
-			options.DefaultAuthenticateScheme = "Bearer";
-			options.DefaultChallengeScheme = "Bearer";
-		})
-		.AddJwtBearer(options =>
-		{
-			options.TokenValidationParameters = new TokenValidationParameters
-			{
-				ValidateIssuer = true,
-				ValidateAudience = true,
-				ValidateLifetime = true,
-				ValidateIssuerSigningKey = true,
-				ValidIssuer = builder.Configuration["Jwt:Issuer"],
-				ValidAudience = builder.Configuration["Jwt:Audience"],
-				IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-			};
-		});
+    {
+        options.DefaultAuthenticateScheme = "Bearer";
+        options.DefaultChallengeScheme = "Bearer";
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
 
 builder.Services.AddAuthorization(options =>
 {
-	options.AddPolicy("RequireAuthenticatedUser", policy =>
-			policy.RequireAuthenticatedUser());
-	options.AddPolicy("AllowAnonymous", policy =>
-			policy.RequireAssertion(_ => true));
+    options.AddPolicy("RequireAuthenticatedUser", policy =>
+        policy.RequireAuthenticatedUser());
+    options.AddPolicy("AllowAnonymous", policy =>
+        policy.RequireAssertion(_ => true));
 });
+
 #endregion
 
 #region Swagger
@@ -58,7 +59,7 @@ builder.Services.AddSwaggerGen();
 #region Gateway
 
 builder.Services.AddReverseProxy()
-		.LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
 #endregion
 
@@ -66,8 +67,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 #region Middlewares
@@ -82,27 +83,27 @@ app.MapReverseProxy();
 
 app.MapPost("/user/register", async (UserManager<IdentityUser> userManager, RegisterRequest request) =>
 {
-	var user = new IdentityUser { UserName = request.Email, Email = request.Email };
-	var result = await userManager.CreateAsync(user, request.Password);
+    var user = new IdentityUser { UserName = request.Email, Email = request.Email };
+    var result = await userManager.CreateAsync(user, request.Password);
 
-	if (!result.Succeeded)
-		return Results.BadRequest(result.Errors);
+    if (!result.Succeeded)
+        return Results.BadRequest(result.Errors);
 
-	return Results.Ok("User created successfully");
+    return Results.Ok("User created successfully");
 });
 
 app.MapGet("/auth/{teste}", async (string teste) => { return Results.Ok(teste); }).RequireAuthorization();
 
 app.MapPost("/user/login",
-		async (UserManager<IdentityUser> userManager, IConfiguration configuration, LoginRequest request) =>
-		{
-			var user = await userManager.FindByEmailAsync(request.Email);
-			if (user == null || !await userManager.CheckPasswordAsync(user, request.Password))
-				return Results.Unauthorized();
+    async (UserManager<IdentityUser> userManager, IConfiguration configuration, LoginRequest request) =>
+    {
+        var user = await userManager.FindByEmailAsync(request.Email);
+        if (user == null || !await userManager.CheckPasswordAsync(user, request.Password))
+            return Results.Unauthorized();
 
-			var token = GenerateJwtToken(user, configuration);
-			return Results.Ok(new { Token = token });
-		});
+        var token = GenerateJwtToken(user, configuration);
+        return Results.Ok(new { Token = token });
+    });
 
 #endregion
 
@@ -110,24 +111,24 @@ app.MapPost("/user/login",
 
 string GenerateJwtToken(IdentityUser user, IConfiguration configuration)
 {
-	var claims = new[]
-	{
-				new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-				new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-				new Claim(ClaimTypes.NameIdentifier, user.Id)
-		};
+    var claims = new[]
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(ClaimTypes.NameIdentifier, user.Id)
+    };
 
-	var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
-	var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-	var token = new JwtSecurityToken(
-			configuration["Jwt:Issuer"],
-			configuration["Jwt:Audience"],
-			claims,
-			expires: DateTime.Now.AddMinutes(30),
-			signingCredentials: creds);
+    var token = new JwtSecurityToken(
+        configuration["Jwt:Issuer"],
+        configuration["Jwt:Audience"],
+        claims,
+        expires: DateTime.Now.AddMinutes(30),
+        signingCredentials: creds);
 
-	return new JwtSecurityTokenHandler().WriteToken(token);
+    return new JwtSecurityTokenHandler().WriteToken(token);
 }
 
 #endregion

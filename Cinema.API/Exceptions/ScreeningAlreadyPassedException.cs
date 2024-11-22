@@ -1,17 +1,14 @@
+namespace Cinema.API.Exceptions;
 
-namespace Cinema.API.Exceptions
+public class ScreeningAlreadyPassedException : ConflictException
 {
-    public class ScreeningAlreadyPassedException : ConflictException
+    public ScreeningAlreadyPassedException()
+        : base("The screening date has already passed.")
     {
-        public ScreeningAlreadyPassedException()
-            : base("The screening date has already passed.")
-        {
-        }
-
-        public ScreeningAlreadyPassedException(string message)
-            : base(message)
-        {
-        }
     }
 
+    public ScreeningAlreadyPassedException(string message)
+        : base(message)
+    {
+    }
 }
