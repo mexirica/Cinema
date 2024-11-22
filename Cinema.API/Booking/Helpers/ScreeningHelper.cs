@@ -1,10 +1,10 @@
-using Cinema.API.Screenings.Exceptions;
+using Cinema.API.Exceptions;
 
 namespace Cinema.API.Booking.Helpers;
 
 public class ScreeningHelper
 {
-
+	
 	public static async Task<Screening> GetScreeningAsync(CinemaDbContext db, int screeningId,
 			CancellationToken cancellationToken)
 	{
@@ -23,8 +23,8 @@ public class ScreeningHelper
 		return screening;
 	}
 
-	public static async Task<(bool Success, string Message)> BookScreeningAsync(CinemaDbContext db, int screeningId,
-			IEnumerable<int> seatsId, int customerId, int saleId, CancellationToken cancellationToken)
+	public static async Task<(bool Success, string Message, List<SaleScreening> SaleScreenings, List<SaleScreeningSeat> SaleScreeningSeats)> 
+		BookScreeningAsync(CinemaDbContext db, int screeningId, IEnumerable<int> seatsId, int saleId, CancellationToken cancellationToken)
 	{
 		var seatsIdArray = seatsId.ToArray();
 
@@ -33,12 +33,12 @@ public class ScreeningHelper
 		var screening = await GetScreeningAsync(db, screeningId, cancellationToken);
 		if (screening.IsAlreadyPassed())
 			throw new ScreeningAlreadyPassedException(
-					$"Screening for the movie {screening.Movie.Title}, date {screening.Date}, already passed");
+				$"Screening for the movie {screening.Movie.Title}, date {screening.Date}, already passed");
 
 		var seats = await db.Seats.Where(s => seatsIdArray.Contains(s.Id)).ToListAsync(cancellationToken);
 
 		if (seats.Count != seatsIdArray.Length)
-			return (false, "One or more seats not found");
+			return (false, "One or more seats not found", null, null);
 
 		var seatsTaken = new List<int>();
 		foreach (var seat in seats)
@@ -48,10 +48,10 @@ public class ScreeningHelper
 		}
 
 		if (seatsTaken.Count > 0)
-			return (false, $"Seats {string.Join(',', seatsTaken)} are already reserved for screening {screening.Id}.");
+			return (false, $"Seats {string.Join(',', seatsTaken)} are already reserved for movie {screening.Movie.Title} at {screening.Time}.", null, null);
 
-
-		var seatMsg = seats.Count == 1 ? "Seat" : "Seats";
+		var saleScreenings = new List<SaleScreening>();
+		var saleScreeningSeats = new List<SaleScreeningSeat>();
 
 		foreach (var seat in seats)
 		{
@@ -61,18 +61,19 @@ public class ScreeningHelper
 				SaleId = saleId,
 				UnassignedSeat = false
 			};
-			db.SaleScreenings.Add(saleScreening);
-			await db.SaveChangesAsync(cancellationToken);
+			saleScreenings.Add(saleScreening);
 
 			var saleScreeningSeat = new SaleScreeningSeat
 			{
 				SaleScreening = saleScreening,
 				SeatId = seat.Id
 			};
-			db.SaleScreeningSeats.Add(saleScreeningSeat);
-			await db.SaveChangesAsync(cancellationToken);
+			saleScreeningSeats.Add(saleScreeningSeat);
 		}
 
-		return (true, $"{seatMsg} successfully booked");
+		var msg = seats.Count == 1 ? "Seat" : "Seats";
+
+		return (true, $"{msg} successfully booked", saleScreenings, saleScreeningSeats);
 	}
+
 }

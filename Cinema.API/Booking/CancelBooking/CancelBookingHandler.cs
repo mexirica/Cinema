@@ -1,7 +1,7 @@
 using BuildingBlocks.MessageBus;
 using Cinema.API.Helpers;
 using Cinema.API.Models;
-using Cinema.API.Screenings.Exceptions;
+using Cinema.API.Exceptions;
 using FluentValidation;
 using MassTransit;
 

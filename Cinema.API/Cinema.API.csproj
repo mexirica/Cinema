@@ -34,7 +34,6 @@
         <Content Include="..\.dockerignore">
             <Link>.dockerignore</Link>
         </Content>
-        <Content Include="Movies\.DS_Store" />
     </ItemGroup>
 
     <ItemGroup>

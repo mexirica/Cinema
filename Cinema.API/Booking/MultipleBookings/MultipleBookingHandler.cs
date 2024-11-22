@@ -54,65 +54,69 @@ public class ScreeningSeatDtoValidator : AbstractValidator<ScreeningSeatDto>
 public class MultipleBookingHandler(CinemaDbContext db, IPublishEndpoint publisher)
 		: ICommandHandler<MultipleBookingCommand, MultipleBookingCommandResult>
 {
-	public async Task<MultipleBookingCommandResult> Handle(MultipleBookingCommand request,
-			CancellationToken cancellationToken)
-	{
-		await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-		try
-		{
-			var customer = await db.Customers.FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken);
+public async Task<MultipleBookingCommandResult> Handle(MultipleBookingCommand request, CancellationToken cancellationToken)
+{
+    await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+    try
+    {
+        var customer = await db.Customers.FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken);
 
-			if (customer is null) throw new NotFoundException("Customer not found");
+        if (customer is null) throw new NotFoundException("Customer not found");
 
-			var screenings = await db.Screenings
-					.Include(s => s.Movie)
-					.Where(s => request.ScreeningSeats.Select(ss => ss.ScreeningId).Contains(s.Id))
-					.ToListAsync(cancellationToken);
+        var screenings = await db.Screenings
+            .Include(s => s.Movie)
+            .Where(s => request.ScreeningSeats.Select(ss => ss.ScreeningId).Contains(s.Id))
+            .ToListAsync(cancellationToken);
 
-			var amount = screenings.Sum(s =>
-			{
-				var seatCount = request.ScreeningSeats
-									.First(ss => ss.ScreeningId == s.Id)
-									.SeatId.Count();
-				return s.Price * seatCount;
-			});
+        var amount = screenings.Sum(s =>
+        {
+            var seatCount = request.ScreeningSeats
+                                .First(ss => ss.ScreeningId == s.Id)
+                                .SeatId.Count();
+            return s.Price * seatCount;
+        });
 
-			var sale = new Sale
-			{
-				CustomerId = request.CustomerId,
-				SaleDate = DateTime.UtcNow,
-				AmountPaid = amount
-			};
+        var sale = new Sale
+        {
+            CustomerId = request.CustomerId,
+            SaleDate = DateTime.UtcNow,
+            AmountPaid = amount
+        };
 
-			db.Sales.Add(sale);
-			await db.SaveChangesAsync(cancellationToken);
+        db.Sales.Add(sale);
+        await db.SaveChangesAsync(cancellationToken);
 
-			foreach (var ss in request.ScreeningSeats)
-			{
-				var (success, message) = await ScreeningHelper.BookScreeningAsync(
-						db, ss.ScreeningId, ss.SeatId.ToArray(), request.CustomerId, sale.Id, cancellationToken);
+        foreach (var ss in request.ScreeningSeats)
+        {
+            var (success, message, saleScreenings, saleScreeningSeats) = await ScreeningHelper.BookScreeningAsync(
+                db, ss.ScreeningId, ss.SeatId.ToArray(), sale.Id, cancellationToken);
 
-				if (!success)
-				{
-					await transaction.RollbackAsync(cancellationToken);
-					return new MultipleBookingCommandResult(false, message, null);
-				}
-			}
-				await db.SaveChangesAsync(cancellationToken);
-				await transaction.CommitAsync(cancellationToken);
+            if (!success)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return new MultipleBookingCommandResult(false, message, null);
+            }
 
-				await publisher.Publish(
-				MessageFactory.CreateTicketPurchasedMessage(customer,screenings), cancellationToken);
+            db.SaleScreenings.AddRange(saleScreenings);
+            db.SaleScreeningSeats.AddRange(saleScreeningSeats);
+        }
 
-				return new MultipleBookingCommandResult(true, "All seats successfully booked", sale.Id);
-		}
-		catch
-		{
-			if (transaction.GetDbTransaction().Connection != null)
-			{
-				await transaction.RollbackAsync(cancellationToken);
-			}
-			throw;
-		}
-	}
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+
+        await publisher.Publish(
+            MessageFactory.CreateTicketPurchasedMessage(customer, screenings), cancellationToken);
+
+        return new MultipleBookingCommandResult(true, "All seats successfully booked", sale.Id);
+    }
+    catch
+    {
+        if (transaction.GetDbTransaction().Connection != null)
+        {
+            await transaction.RollbackAsync(cancellationToken);
+        }
+        throw;
+    }
+}
+
 }

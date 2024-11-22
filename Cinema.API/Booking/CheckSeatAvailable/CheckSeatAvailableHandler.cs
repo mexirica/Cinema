@@ -1,5 +1,5 @@
 using Cinema.API.Booking.Helpers;
-using Cinema.API.Screenings.Exceptions;
+using Cinema.API.Exceptions;
 using FluentValidation;
 
 namespace Cinema.API.Screenings.CheckSeatAvailable;

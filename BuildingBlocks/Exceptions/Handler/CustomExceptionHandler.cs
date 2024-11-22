@@ -1,5 +1,4 @@
-﻿using Cinema.API.Screenings.Exceptions;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -60,7 +59,7 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
 					context.Response.StatusCode = StatusCodes.Status404NotFound
 			),
 
-			ScreeningAlreadyPassedException =>
+			ConflictException =>
 			(
 					exception.Message,
 					exception.GetType().Name,

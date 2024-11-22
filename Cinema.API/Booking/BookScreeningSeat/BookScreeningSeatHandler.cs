@@ -66,7 +66,6 @@ public class BookScreeningSeatHandler(CinemaDbContext db, IPublishEndpoint publi
 			};
 
 			db.SaleScreenings.Add(saleScreening);
-			await db.SaveChangesAsync(cancellationToken);
 
 			var saleScreeningSeat = new SaleScreeningSeat
 			{
