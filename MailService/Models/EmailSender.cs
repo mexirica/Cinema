@@ -33,7 +33,6 @@ namespace NotificationService.Models
 		{
 			var mailMessage = new MailMessage
 			{
-				fadsfaf
 				From = new MailAddress(_config.Address),
 				Subject = subject,
 				Body = body,

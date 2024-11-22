@@ -1,4 +1,5 @@
 using BuildingBlocks.MessageBus;
+using Cinema.API.Booking.Helpers;
 using Cinema.API.Helpers;
 using FluentValidation;
 using MassTransit;
@@ -68,12 +69,9 @@ public class BookScreeningHandler(CinemaDbContext db, IPublishEndpoint publisher
             await transaction.CommitAsync(cancellationToken);
             
                 await publisher.Publish(
-                    new Message(
-                        customer.Email,
-                        "Ticket purchased",
-                        $"Hi {customer.Name} " +
-                        $"\nYou have successfully purchased a ticket for the screening {screening.Movie.Title}" +
-                        $" on {screening.Date}"), cancellationToken);
+                    MessageFactory
+                    .CreateGenericTicketPurchasedMessage(customer,screening),
+                    cancellationToken);
 
             return new BuyScreeningResult(true, sale.Id, null);
         }
