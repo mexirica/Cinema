@@ -11,11 +11,12 @@
       - ASPNETCORE_HTTP_PORTS=8081
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Database=Server=cinema-db;Port=5432;Database=Cinema;User Id=postgres;Password=postgres;Include Error Detail=true
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://cinema.dashboard:18888
-
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://cinema.dashboard:18889
     depends_on:
       - cinema-db
       - cinema-mq
+    networks:
+      - otel
 
   gateway:
     image: gateway
@@ -29,9 +30,11 @@
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Database=Server=cinema-db;Port=5432;Database=Cinema;User Id=postgres;Password=postgres;Include Error Detail=true
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://cinema.dashboard:18888
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://cinema.dashboard:18889
     depends_on:
       - cinema-db
+    networks:
+      - otel
   
   notification:
     image: notification
@@ -44,21 +47,26 @@
     environment:
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_ENVIRONMENT=Development
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://cinema.dashboard:18889
     depends_on:
       - cinema-mq
+    networks:
+      - otel
 
   cinema-db:
     image: postgres
     container_name: cinema-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: Cinema
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=Cinema
     restart: always
     ports:
       - "5432:5432"
     volumes:
       - postgres_cinema:/var/lib/postgresql/data
+    networks:
+      - otel
   
   cinema-mq:
     image: rabbitmq:3-management-alpine
@@ -71,17 +79,21 @@
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=password
+    networks:
+      - otel
 
   cinema.dashboard:
     image: mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest
-    container_name: dashboard
+    container_name: cinema.dashboard
     ports:
       - "18888:18888"
+    environment:
+      - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
     networks:
       - otel
-  
+
 networks:
-    otel:
+  otel:
 
 volumes:
   postgres_cinema:

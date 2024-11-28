@@ -1,4 +1,5 @@
 using BuildingBlocks.Behaviors;
+using BuildingBlocks.Configurations;
 using BuildingBlocks.Exceptions.Handler;
 using BuildingBlocks.MessageBus;
 using Cinema.API.Configurations;
@@ -55,6 +56,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
+#region OpenTelemetry
+
+builder.Services.AddOpenTelemetryMetricsAndTracing(builder.Environment.ApplicationName);
+builder.Logging.AddOpenTelemetryLogging();
+#endregion
 
 var app = builder.Build();
 app.MapCarter();

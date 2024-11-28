@@ -1,3 +1,4 @@
+using BuildingBlocks.Configurations;
 using BuildingBlocks.MessageBus;
 using NotificationService.Models;
 using Serilog;
@@ -6,6 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<ISender, EmailSender>();
 builder.Services.AddMessageBroker(builder.Configuration, typeof(Program).Assembly);
+
+#region Logging
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -18,7 +21,15 @@ Log.Logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Services.AddSerilog();
 
-var app = builder.Build();
+#endregion
 
+#region OpenTelemetry
+
+builder.Services.AddOpenTelemetryMetricsAndTracing(builder.Environment.ApplicationName);
+builder.Logging.AddOpenTelemetryLogging();
+
+#endregion
+
+var app = builder.Build();
 
 app.Run();

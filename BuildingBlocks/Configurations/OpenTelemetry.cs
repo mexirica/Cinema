@@ -9,7 +9,7 @@ namespace BuildingBlocks.Configurations
 {
 	public static class OpenTelemetry
 	{
-		public static IServiceCollection AddMetricsAndTracing(this IServiceCollection services, string appName)
+		public static IServiceCollection AddOpenTelemetryMetricsAndTracing(this IServiceCollection services, string appName)
 		{
 			services.AddOpenTelemetry()
 			.ConfigureResource(resource => resource.AddService(appName))
@@ -17,23 +17,22 @@ namespace BuildingBlocks.Configurations
 			{
 				metrics.
 				AddAspNetCoreInstrumentation()
-				.AddHttpClientInstrumentation();
-
-				metrics.AddOtlpExporter();
+				.AddHttpClientInstrumentation()
+				.AddOtlpExporter();
+				
 			})
 			.WithTracing(tracing =>
 			{
 				tracing.AddAspNetCoreInstrumentation()
 				.AddHttpClientInstrumentation()
-				.AddEntityFrameworkCoreInstrumentation();
-
-				tracing.AddOtlpExporter();
+				.AddEntityFrameworkCoreInstrumentation()
+				.AddOtlpExporter();
 			});
 
 			return services;
 		}
 
-		public static ILoggingBuilder AddLogging(this ILoggingBuilder builder)
+		public static ILoggingBuilder AddOpenTelemetryLogging(this ILoggingBuilder builder)
 		{
 			builder.AddOpenTelemetry(logging => logging.AddOtlpExporter());
 
