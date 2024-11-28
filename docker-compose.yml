@@ -11,6 +11,8 @@
       - ASPNETCORE_HTTP_PORTS=8081
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Database=Server=cinema-db;Port=5432;Database=Cinema;User Id=postgres;Password=postgres;Include Error Detail=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://cinema.dashboard:18888
+
     depends_on:
       - cinema-db
       - cinema-mq
@@ -27,6 +29,7 @@
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__Database=Server=cinema-db;Port=5432;Database=Cinema;User Id=postgres;Password=postgres;Include Error Detail=true
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://cinema.dashboard:18888
     depends_on:
       - cinema-db
   
@@ -69,6 +72,16 @@
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=password
 
+  cinema.dashboard:
+    image: mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest
+    container_name: dashboard
+    ports:
+      - "18888:18888"
+    networks:
+      - otel
+  
+networks:
+    otel:
 
 volumes:
   postgres_cinema:
