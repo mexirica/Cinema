@@ -53,16 +53,7 @@ builder.Services.AddAuthorization(options =>
 
 #region Logging
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("logs/log.csv",
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss}, {Level}, {Message}{NewLine}{Exception}"
-        , rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-
-builder.Logging.ClearProviders();
-builder.Services.AddSerilog();
+builder.AddSerilogWithOpenTelemetry();
 
 #endregion
 
@@ -115,8 +106,6 @@ app.MapPost("/user/register", async (UserManager<IdentityUser> userManager, Regi
 
     return Results.Ok("User created successfully");
 });
-
-app.MapGet("/auth/{teste}", async (string teste) => { return Results.Ok(teste); }).RequireAuthorization();
 
 app.MapPost("/user/login",
     async (UserManager<IdentityUser> userManager, IConfiguration configuration, LoginRequest request) =>

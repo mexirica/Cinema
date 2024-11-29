@@ -8,13 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Hangfire" Version="1.8.15"/>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.11"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.11" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\BuildingBlocks\BuildingBlocks.csproj"/>
+        <ProjectReference Include="..\BuildingBlocks\BuildingBlocks.csproj" />
     </ItemGroup>
 
     <ItemGroup>

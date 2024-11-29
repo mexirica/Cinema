@@ -39,16 +39,7 @@ builder.Services.AddScoped<DatabaseSeeder>();
 
 #region Logging
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("logs/log.csv",
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss}, {Level}, {Message}{NewLine}{Exception}"
-        , rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-
-builder.Logging.ClearProviders();
-builder.Services.AddSerilog();
+builder.AddSerilogWithOpenTelemetry();
 
 #endregion
 
