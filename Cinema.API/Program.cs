@@ -59,8 +59,6 @@ app.MapCarter();
 
 app.MigrateDatabase();
 
-fadfadsf
-
 app.UseExceptionHandler(opts => { });
 
 // Configure the HTTP request pipeline.
