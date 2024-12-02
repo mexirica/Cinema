@@ -4,7 +4,7 @@ using Cinema.API.Exceptions;
 namespace Cinema.API.Data;
 
 
-    public class ScreeningRepository(CinemaDbContext context, SeatRepository seatRepository) : IScreeningRepository
+    public class ScreeningRepository(CinemaDbContext context, ISeatRepository seatRepository) : IScreeningRepository
     {
         public async Task<Screening> GetByID(int id, CancellationToken cancellationToken = default)
         {
