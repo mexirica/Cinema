@@ -1,4 +1,3 @@
-using Cinema.API.Booking.Helpers;
 using Cinema.API.Helpers;
 using FluentValidation;
 using MassTransit;
@@ -50,7 +49,7 @@ public class ScreeningSeatDtoValidator : AbstractValidator<ScreeningSeatDto>
 
 #endregion
 
-public class MultipleBookingHandler(CinemaDbContext db, IPublishEndpoint publisher)
+public class MultipleBookingHandler(CinemaDbContext db, IScreeningRepository screeningRepository, IPublishEndpoint publisher)
     : ICommandHandler<MultipleBookingCommand, MultipleBookingCommandResult>
 {
     public async Task<MultipleBookingCommandResult> Handle(MultipleBookingCommand request,
@@ -88,7 +87,7 @@ public class MultipleBookingHandler(CinemaDbContext db, IPublishEndpoint publish
 
             foreach (var ss in request.ScreeningSeats)
             {
-                var (success, message, saleScreenings, saleScreeningSeats) = await ScreeningHelper.BookScreeningAsync(
+                var (success, message, saleScreenings, saleScreeningSeats) = await screeningRepository.BookScreeningAsync(
                     db, ss.ScreeningId, ss.SeatId.ToArray(), sale.Id, cancellationToken);
 
                 if (!success)

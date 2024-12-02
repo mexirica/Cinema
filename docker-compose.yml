@@ -91,6 +91,13 @@
       - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
     networks:
       - otel
+        
+  distributedcache:
+    image: redis
+    container_name: distributedcache
+    restart: always
+    ports:
+      - "6379:6379"
 
 networks:
   otel:

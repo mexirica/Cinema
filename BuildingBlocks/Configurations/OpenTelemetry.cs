@@ -29,7 +29,7 @@ namespace BuildingBlocks.Configurations
 				.AddOtlpExporter();
 			});
 
-			return services;
+				return services;
 		}
 
 		public static ILoggingBuilder AddOpenTelemetryLogging(this ILoggingBuilder builder)
