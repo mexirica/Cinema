@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Cinema.API.Models;
 
@@ -13,8 +14,8 @@ public class SaleScreening
     [ForeignKey(nameof(Screening))]
     public int ScreeningId { get; set; }
 
-    public Sale? Sale { get; set; }
-    public Screening? Screening { get; set; }
+   [JsonIgnore] public Sale? Sale { get; set; }
+    [JsonIgnore]public Screening? Screening { get; set; }
 
     public bool UnassignedSeat { get; set; }
 }

@@ -67,31 +67,45 @@ public class CachedSeatRepository(ISeatRepository repository, IDistributedCache 
     {
         var cacheKey = $"RoomSeat_{seatId}";
         var cachedRoomSeat = await cache.GetStringAsync(cacheKey, cancellationToken);
-        if (cachedRoomSeat != null)
+
+        if (!string.IsNullOrEmpty(cachedRoomSeat))
         {
             return JsonSerializer.Deserialize<RoomSeat>(cachedRoomSeat);
         }
 
         var roomSeat = await repository.GetRoomSeatAsync(seatId, cancellationToken);
-        if (roomSeat != null)
+        
+        if (roomSeat == null) return roomSeat;
+        
+        var cacheOptions = new DistributedCacheEntryOptions
         {
-            await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(roomSeat), cancellationToken);
-        }
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
+        };
+
+        await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(roomSeat), cacheOptions, cancellationToken);
 
         return roomSeat;
     }
+
 
     public async Task<bool> IsSeatReservedAsync(int screeningId, int seatId, CancellationToken cancellationToken = default)
     {
         var cacheKey = $"ReservedSeat_{screeningId}_{seatId}";
         var cachedIsReserved = await cache.GetStringAsync(cacheKey, cancellationToken);
-        if (cachedIsReserved != null)
+
+        if (!string.IsNullOrEmpty(cachedIsReserved))
         {
             return JsonSerializer.Deserialize<bool>(cachedIsReserved);
         }
 
         var isReserved = await repository.IsSeatReservedAsync(screeningId, seatId, cancellationToken);
-        await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(isReserved), cancellationToken);
+
+        var cacheOptions = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+        };
+
+        await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(isReserved), cacheOptions, cancellationToken);
 
         return isReserved;
     }
