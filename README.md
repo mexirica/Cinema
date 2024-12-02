@@ -16,6 +16,8 @@ There is a couple of microservices which implemented **Cinema** modules over **C
 * Publish Message Queue with using **MassTransit and RabbitMQ**
 * Entity Framework Core ORM — Psql Data Provider, Seeding and Migrations to simplify data access and ensure high performance
 * Implementing **CQRS, and Vertical Slicing** with using Best Practices
+* Open Telemetry with Aspire Dashboard
+* Cached Repository using the Decorator Pattern
 
 #### Microservices Notification
 * Async Microservices Communication with **RabbitMQ Message-Broker Service**
@@ -63,3 +65,5 @@ docker-compose up -d
 * **/screenings/{screeningId}/choose-seat** Send a POST to book a screening and choose a seat
 * **/screenings/{screeningId}/check-seat-available/{seatId}** Send a GET to see if the seat is available for this screening
 * **/screenings/{screeningId}/cancel-booking** Send a Delete to cancel the sale
+
+3.Dashboard (localhost:18888)
