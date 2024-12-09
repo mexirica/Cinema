@@ -1,7 +1,9 @@
 using BuildingBlocks.Behaviors;
+using BuildingBlocks.Configurations;
 using BuildingBlocks.Exceptions.Handler;
 using BuildingBlocks.MessageBus;
 using Cinema.API.Configurations;
+using Cinema.API.Data.Repositories;
 using FluentValidation;
 using Serilog;
 
@@ -28,26 +30,32 @@ builder.Services.AddMessageBroker(builder.Configuration);
 var conn = builder.Configuration["ChoosedDatabase"]
            ?? throw new ArgumentException("Choosed database not found");
 
-builder.Services.AddDatabase(builder.Configuration, conn).AddHealthChecks()
-    .AddNpgSql(builder.Configuration.GetConnectionString(conn)!);
+builder.Services.AddDatabase(builder.Configuration, conn);
+
+builder.Services.AddStackExchangeRedisCache(opts =>
+{
+    opts.Configuration = builder.Configuration.GetConnectionString("Redis")!;
+});
+
+builder.Services.AddScoped<IScreeningRepository, ScreeningRepository>();
+builder.Services.Decorate<IScreeningRepository, CachedScreeningRepository>();
+
+
+builder.Services.AddScoped<ISeatRepository, SeatRepository>();
+builder.Services.Decorate<ISeatRepository, CachedSeatRepository>();
 
 builder.Services.AddDbContext<CinemaDbContext>();
 builder.Services.AddScoped<DatabaseSeeder>();
+
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString(conn)!)
+    .AddRedis(builder.Configuration.GetConnectionString("Redis")!);
 
 #endregion
 
 #region Logging
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("logs/log.csv",
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss}, {Level}, {Message}{NewLine}{Exception}"
-        , rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-
-builder.Logging.ClearProviders();
-builder.Services.AddSerilog();
+builder.AddSerilogWithOpenTelemetry();
 
 #endregion
 
@@ -55,6 +63,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+
+#region OpenTelemetry
+
+builder.Services.AddOpenTelemetryMetricsAndTracing(builder.Environment.ApplicationName);
+builder.Logging.AddOpenTelemetryLogging();
+#endregion
 
 var app = builder.Build();
 app.MapCarter();

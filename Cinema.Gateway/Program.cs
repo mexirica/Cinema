@@ -1,6 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using BuildingBlocks.Configurations;
+using Cinema.Gateway.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -36,7 +38,7 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
 
@@ -52,16 +54,14 @@ builder.Services.AddAuthorization(options =>
 
 #region Logging
 
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("logs/log.csv",
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss}, {Level}, {Message}{NewLine}{Exception}"
-        , rollingInterval: RollingInterval.Day)
-    .CreateLogger();
+builder.AddSerilogWithOpenTelemetry();
 
-builder.Logging.ClearProviders();
-builder.Services.AddSerilog();
+#endregion
+
+#region OpenTelemetry
+
+builder.Logging.AddOpenTelemetryLogging();
+builder.Services.AddOpenTelemetryMetricsAndTracing(builder.Environment.ApplicationName);
 
 #endregion
 
@@ -79,12 +79,15 @@ builder.Services.AddReverseProxy()
 
 #endregion
 
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.MigrateDatabase();
 }
 
 #region Middlewares
@@ -107,8 +110,6 @@ app.MapPost("/user/register", async (UserManager<IdentityUser> userManager, Regi
 
     return Results.Ok("User created successfully");
 });
-
-app.MapGet("/auth/{teste}", async (string teste) => { return Results.Ok(teste); }).RequireAuthorization();
 
 app.MapPost("/user/login",
     async (UserManager<IdentityUser> userManager, IConfiguration configuration, LoginRequest request) =>

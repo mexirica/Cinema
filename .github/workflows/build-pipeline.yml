@@ -3,10 +3,10 @@ name: Build Pipeline
 on:
   push:
     branches:
-      - master
+      - develop
   pull_request:
     branches:
-      - master
+      - develop
 
 jobs:
   build:
@@ -20,6 +20,14 @@ jobs:
         uses: actions/setup-dotnet@v2
         with:
           dotnet-version: '8.0'
+          
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/global.json', '**/*.csproj', '**/*.fsproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
         run: dotnet restore Cinema.sln

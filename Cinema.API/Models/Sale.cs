@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Cinema.API.Models;
 
@@ -18,5 +19,5 @@ public class Sale
     public decimal AmountPaid { get; set; }
 
     // Navigation property
-    public Customer? Customer { get; set; }
+    [JsonIgnore]public Customer? Customer { get; set; }
 }

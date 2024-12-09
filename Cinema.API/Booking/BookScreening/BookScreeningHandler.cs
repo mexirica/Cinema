@@ -1,4 +1,3 @@
-using Cinema.API.Booking.Helpers;
 using Cinema.API.Helpers;
 using FluentValidation;
 using MassTransit;
@@ -27,7 +26,7 @@ public class BuyScreeningCommandValidator : AbstractValidator<BuyScreeningComman
 
 #endregion
 
-public class BookScreeningHandler(CinemaDbContext db, IPublishEndpoint publisher)
+public class BookScreeningHandler(CinemaDbContext db, IPublishEndpoint publisher,IScreeningRepository screeningRepository)
     : ICommandHandler<BuyScreeningCommand, BuyScreeningResult>
 {
     public async Task<BuyScreeningResult> Handle(BuyScreeningCommand request, CancellationToken cancellationToken)
@@ -35,7 +34,7 @@ public class BookScreeningHandler(CinemaDbContext db, IPublishEndpoint publisher
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var screening = await ScreeningHelper.GetScreeningAsync(db, request.ScreeningId, cancellationToken);
+            var screening = await screeningRepository.GetByID(request.ScreeningId, cancellationToken);
 
             var customer = await db.Customers.FirstOrDefaultAsync(c => c.Id == request.CustomerId, cancellationToken);
 

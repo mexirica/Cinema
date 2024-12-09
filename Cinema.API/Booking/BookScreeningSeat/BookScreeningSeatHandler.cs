@@ -1,4 +1,3 @@
-using Cinema.API.Booking.Helpers;
 using Cinema.API.Helpers;
 using FluentValidation;
 using MassTransit;
@@ -27,7 +26,7 @@ public class ChooseSeatCommandValidator : AbstractValidator<ChooseSeatCommand>
 
 #endregion
 
-public class BookScreeningSeatHandler(CinemaDbContext db, IPublishEndpoint publisher)
+public class BookScreeningSeatHandler(CinemaDbContext db, IPublishEndpoint publisher,IScreeningRepository screeningRepository, ISeatRepository seatRepository)
     : ICommandHandler<ChooseSeatCommand, ChooseSeatCommandResult>
 {
     public async Task<ChooseSeatCommandResult> Handle(ChooseSeatCommand request, CancellationToken cancellationToken)
@@ -35,12 +34,12 @@ public class BookScreeningSeatHandler(CinemaDbContext db, IPublishEndpoint publi
         await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         try
         {
-            var screening = await ScreeningHelper.GetScreeningAsync(db, request.ScreeningId, cancellationToken);
+            var screening = await screeningRepository.GetByID(request.ScreeningId, cancellationToken);
 
-            var roomSeat = await SeatHelper.GetRoomSeatAsync(db, request.SeatId, cancellationToken);
+            var roomSeat = await seatRepository.GetRoomSeatAsync(request.SeatId, cancellationToken);
 
             var isSeatReserved =
-                await SeatHelper.IsSeatReservedAsync(db, screening.Id, roomSeat.SeatId, cancellationToken);
+                await seatRepository.IsSeatReservedAsync(screening.Id, roomSeat.SeatId, cancellationToken);
 
             if (isSeatReserved) return new ChooseSeatCommandResult(false, "Seat already taken", null);
 

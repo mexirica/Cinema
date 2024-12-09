@@ -8,6 +8,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Cinema.Gateway/Cinema.Gateway.csproj", "Cinema.Gateway/"]
+COPY ["BuildingBlocks/BuildingBlocks.csproj", "BuildingBlocks/"]
 RUN dotnet restore "Cinema.Gateway/Cinema.Gateway.csproj"
 COPY . .
 WORKDIR "/src/Cinema.Gateway"
